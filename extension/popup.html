@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Novelty Verify</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 300px;
+      margin: 0;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .header img {
+      height: 40px;
+    }
+    .header h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      color: #333;
+    }
+    .domain-info {
+      margin-top: 10px;
+    }
+    .risk {
+      font-weight: bold;
+      color: red;
+    }
+    ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    li {
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icon128.png" alt="Logo" />
+    <h1>Novelty Verify</h1>
+  </div>
+  <div id="info">
+    <p>Loading risk analysis...</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const domain = new URL(tabs[0].url).hostname.replace('www.', '');
+
+        fetch(chrome.runtime.getURL('appData.js'))
+          .then(res => res.text())
+          .then(text => {
+            const appData = eval(text);
+            const unapproved = appData.unapprovedApps.find(app => domain.includes(app.domain));
+            if (unapproved) {
+              const info = document.getElementById('info');
+              info.innerHTML = `
+                <p><strong>🚫 Domain:</strong> ${unapproved.domain}</p>
+                <p><strong>🔁 Suggestion:</strong> ${unapproved.suggestion}</p>
+                <p><strong class="risk">⚠️ Risk Score:</strong> ${unapproved.riskScore}</p>
+                <p><strong>🔒 Reasons:</strong></p>
+                <ul>${unapproved.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+                <p><strong>🛡️ Vulnerabilities:</strong></p>
+                <ul>${unapproved.vulnerabilities.map(v => `<li>${v}</li>`).join('')}</ul>
+              `;
+            } else {
+              document.getElementById('info').innerHTML = '<p>✅ This domain appears safe.</p>';
+            }
+          });
+      });
+    });
+  </script>
+</body>
+</html>
