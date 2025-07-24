@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,38 +6,52 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      width: 300px;
-      margin: 0;
-      padding: 10px;
-      background: #f9f9f9;
+      width: 320px;
+      padding: 15px;
+      background: #fdfdfd;
+      color: #333;
     }
+
     .header {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
     }
+
     .header img {
       height: 40px;
     }
-    .header h1 {
-      font-size: 1.2rem;
+
+    h1 {
+      font-size: 1rem;
       margin: 0;
-      color: #333;
+      color: #222;
     }
-    .domain-info {
-      margin-top: 10px;
+
+    .section {
+      margin-top: 12px;
+      line-height: 1.4;
     }
-    .risk {
-      font-weight: bold;
-      color: red;
-    }
-    ul {
-      margin: 5px 0;
+
+    .section ul {
       padding-left: 20px;
+      margin-top: 4px;
     }
-    li {
+
+    .icon {
+      font-weight: bold;
+      display: inline-block;
+      width: 22px;
+    }
+
+    #scanResult {
+      margin-top: 10px;
       font-size: 0.9em;
+    }
+
+    input[type="file"] {
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -47,37 +60,16 @@
     <img src="icon128.png" alt="Logo" />
     <h1>Novelty Verify</h1>
   </div>
-  <div id="info">
-    <p>Loading risk analysis...</p>
+
+  <div id="info" class="section"></div>
+
+  <div class="section">
+    <strong>🔍 File Upload Scan</strong><br/>
+    <input type="file" id="fileInput" />
+    <p id="scanResult"></p>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const domain = new URL(tabs[0].url).hostname.replace('www.', '');
-
-        fetch(chrome.runtime.getURL('appData.js'))
-          .then(res => res.text())
-          .then(text => {
-            const appData = eval(text);
-            const unapproved = appData.unapprovedApps.find(app => domain.includes(app.domain));
-            if (unapproved) {
-              const info = document.getElementById('info');
-              info.innerHTML = `
-                <p><strong>🚫 Domain:</strong> ${unapproved.domain}</p>
-                <p><strong>🔁 Suggestion:</strong> ${unapproved.suggestion}</p>
-                <p><strong class="risk">⚠️ Risk Score:</strong> ${unapproved.riskScore}</p>
-                <p><strong>🔒 Reasons:</strong></p>
-                <ul>${unapproved.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
-                <p><strong>🛡️ Vulnerabilities:</strong></p>
-                <ul>${unapproved.vulnerabilities.map(v => `<li>${v}</li>`).join('')}</ul>
-              `;
-            } else {
-              document.getElementById('info').innerHTML = '<p>✅ This domain appears safe.</p>';
-            }
-          });
-      });
-    });
-  </script>
+  <script src="popup.js"></script>
+  <script src="virusScan.js"></script>
 </body>
 </html>
