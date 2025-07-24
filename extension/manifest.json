@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Shadow IT Detector",
+  "name": "Novelty Verify",
   "version": "1.0",
   "description": "Detects and logs unapproved cloud apps",
   "permissions": [
