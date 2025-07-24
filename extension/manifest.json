@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Novelty Verify",
   "version": "1.0",
-  "description": "Detects unapproved cloud apps and scans file uploads.",
+  "description": "Detects unapproved cloud apps and suggests alternatives with file scan support.",
   "permissions": ["storage", "tabs", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -10,7 +10,9 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon128.png"
+    "default_icon": {
+      "128": "icon128.png"
+    }
   },
   "content_scripts": [
     {
