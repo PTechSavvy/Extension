@@ -15,30 +15,32 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
-    const domain = new URL(tab.url).hostname;
-    chrome.storage.local.get("approvedApps", (data) => {
-      const approved = data.approvedApps || [];
-      const isApproved = approved.includes(domain);
-      if (!isApproved) {
-        chrome.action.setBadgeText({ tabId, text: "!" });
-        chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
-        chrome.storage.local.set({ lastUnapproved: domain });
-        logUnapproved(domain);
-      } else {
-        chrome.action.setBadgeText({ tabId, text: "" });
-      }
-    });
+    handleTabUpdate(tab.url, tabId);
   }
 });
 
-function logUnapproved(domain) {
-  fetch(`${API_BASE_URL}/log`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      domain,
-      userAgent: navigator.userAgent,
-      user: DEFAULT_USER
-    })
-  }).catch(err => console.error("Log error:", err));
+function handleTabUpdate(url, tabId) {
+  const domain = new URL(url).hostname;
+
+  chrome.storage.local.get("approvedApps", (data) => {
+    const approvedApps = data.approvedApps || [];
+    const isApproved = approvedApps.includes(domain);
+
+    if (!isApproved) {
+      chrome.action.setPopup({ tabId, popup: "popup.html" });
+      chrome.storage.local.set({ lastUnapproved: domain });
+      chrome.action.setBadgeText({ tabId, text: "!" });
+      chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
+
+      fetch(\`\${API_BASE_URL}/log\`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain,
+          userAgent: navigator.userAgent,
+          user: DEFAULT_USER
+        })
+      }).catch(console.error);
+    }
+  });
 }
