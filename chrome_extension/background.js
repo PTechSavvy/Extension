@@ -51,6 +51,19 @@ function handleTabUpdate(url, tabId) {
   });
 }
 
+// Load appData from file
+importScripts("appData.js");
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "checkUnapproved") {
+    const tabDomain = new URL(sender.tab.url).hostname.replace("www.", "");
+
+    const match = appData.unapprovedApps.find(app => tabDomain.includes(app.domain));
+    sendResponse({ isUnapproved: !!match, domain: match?.domain || null });
+    return true;
+  }
+});
+
 // POST to backend to log unapproved visit
 function logUnapprovedDomain(domain) {
   fetch(`${API_BASE_URL}/log`, {
