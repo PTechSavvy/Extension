@@ -10,8 +10,8 @@ chrome.runtime.sendMessage({ action: "checkUnapproved" }, (response) => {
     banner.style.padding = "10px";
     banner.style.zIndex = 9999;
     banner.style.textAlign = "center";
-    banner.innerText = `⚠️ You are visiting an unapproved application: ${response.domain}`;
-    
+    banner.innerHTML = `⚠️ You are visiting an unapproved application: <strong>${response.domain}</strong>`;
+
     const closeBtn = document.createElement("span");
     closeBtn.innerText = " ✖";
     closeBtn.style.marginLeft = "15px";
