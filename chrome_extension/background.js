@@ -10,18 +10,17 @@ const DEFAULT_APPROVED_APPS = [
 const DEFAULT_USER = "hackathon-user@example.com";
 
 // Initialize approved apps list on install
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.set({ approvedApps: DEFAULT_APPROVED_APPS }, () => {
-    console.log("✅ Approved apps initialized.");
-  });
-});
-
-// Listen to tab updates
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url) {
-    handleTabUpdate(tab.url, tabId);
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "checkUnapproved") {
+    chrome.storage.local.get(["approvedApps", "lastUnapproved"], (data) => {
+      const tabDomain = new URL(sender.tab.url).hostname.replace("www.", "");
+      const isUnapproved = (data.approvedApps || []).every(d => !tabDomain.includes(d));
+      sendResponse({ isUnapproved, domain: isUnapproved ? tabDomain : null });
+    });
+    return true;
   }
 });
+
 
 // Main logic to detect unapproved domains
 function handleTabUpdate(url, tabId) {
