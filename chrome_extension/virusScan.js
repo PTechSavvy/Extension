@@ -19,8 +19,14 @@ document.getElementById("fileInput").addEventListener("change", async (event) =>
     });
 
     const data = await response.json();
+
     if (data.data && data.data.id) {
-      resultElem.innerHTML = `✅ File uploaded. <a href="https://www.virustotal.com/gui/file/${data.data.id}" target="_blank">View Results</a>`;
+      resultElem.innerHTML = `
+        ✅ File uploaded. 
+        <a href="https://www.virustotal.com/gui/file/${data.data.id}" target="_blank">
+          View Full Scan Results
+        </a>
+      `;
     } else {
       resultElem.textContent = "⚠️ Failed to get scan ID.";
     }
