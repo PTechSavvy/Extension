@@ -1,34 +1,67 @@
 const API_BASE_URL = "https://novelty-backend.onrender.com";
 const DEFAULT_USER = "hackathon-user@example.com";
 
-// Load appData
+// Load unapproved app data from appData.js
 importScripts("appData.js");
 
-// Detect unapproved domains on tab update
+// Set default approved apps (can be dynamic in future)
+const DEFAULT_APPROVED_APPS = [
+  "docs.google.com",
+  "drive.google.com",
+  "outlook.office.com",
+  "teams.microsoft.com"
+];
+
+// On extension installed – store default approved apps
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.set({ approvedApps: DEFAULT_APPROVED_APPS });
+});
+
+// Detect tab updates and check for unapproved domains
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url) {
+  if (changeInfo.status === "complete" && tab.url.startsWith("http")) {
     handleTabUpdate(tab.url, tabId);
   }
 });
 
-// Check if the domain is unapproved
+// Main logic to check if site is approved or not
 function handleTabUpdate(url, tabId) {
   const domain = new URL(url).hostname.replace("www.", "");
-  const match = appData.unapprovedApps.find(app => domain.includes(app.domain));
 
-  if (match) {
-    chrome.action.setPopup({ tabId, popup: "popup.html" });
-    chrome.action.setBadgeText({ tabId, text: "!" });
-    chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
-    chrome.storage.local.set({ lastUnapproved: domain });
-    logUnapprovedDomain(domain);
-  } else {
-    chrome.action.setBadgeText({ tabId, text: "" });
-    chrome.action.setPopup({ tabId, popup: "popup.html" });
-  }
+  chrome.storage.local.get("approvedApps", (data) => {
+    const approvedApps = data.approvedApps || DEFAULT_APPROVED_APPS;
+    const isApproved = approvedApps.some(approvedDomain => domain.includes(approvedDomain));
+
+    if (!isApproved) {
+      // Flag as unapproved
+      chrome.action.setPopup({ tabId, popup: "popup.html" });
+      chrome.action.setBadgeText({ tabId, text: "!" });
+      chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
+
+      chrome.storage.local.set({ lastUnapproved: domain });
+
+      // ✅ Log only unapproved domains
+      logUnapprovedDomain(domain);
+    } else {
+      // Clear badge if site is approved
+      chrome.action.setBadgeText({ tabId, text: "" });
+      chrome.action.setPopup({ tabId, popup: "popup.html" }); // Still show popup for scanning
+      chrome.storage.local.remove("lastUnapproved");
+    }
+  });
 }
 
-// Log to backend
+// Receive messages from popup.js or other scripts
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "checkUnapproved") {
+    const tabDomain = new URL(sender.tab.url).hostname.replace("www.", "");
+    const match = appData.unapprovedApps.find(app => tabDomain.includes(app.domain));
+    sendResponse({ isUnapproved: !!match, domain: match?.domain || null });
+    return true;
+  }
+});
+
+// POST to backend to log unapproved visit
 function logUnapprovedDomain(domain) {
   fetch(`${API_BASE_URL}/log`, {
     method: "POST",
@@ -38,40 +71,11 @@ function logUnapprovedDomain(domain) {
       userAgent: navigator.userAgent,
       user: DEFAULT_USER
     })
-  }).then(() => {
-    console.log(`📡 Logged unapproved domain: ${domain}`);
-  }).catch(err => {
-    console.error("❌ Failed to log to backend:", err);
-  });
-}
-
-// Handle VirusTotal scan request from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "scanFile") {
-    const blob = new Blob([message.buffer]);
-    const formData = new FormData();
-    formData.append("file", blob, message.name);
-
-    fetch("https://www.virustotal.com/api/v3/files", {
-      method: "POST",
-      headers: {
-        "x-apikey": "98cce6e7426f335d3dc3abf374e6d183919a69777b1f8bfeec24795c6579bf88"
-      },
-      body: formData
+  })
+    .then(() => {
+      console.log(`📡 Logged unapproved domain: ${domain}`);
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data?.data?.id) {
-          sendResponse({ scanId: data.data.id });
-        } else {
-          sendResponse({ error: "⚠️ Failed to get scan ID." });
-        }
-      })
-      .catch(err => {
-        console.error("Scan error:", err);
-        sendResponse({ error: "❌ Error uploading file." });
-      });
-
-    return true;
-  }
-});
+    .catch(err => {
+      console.error("❌ Failed to log to backend:", err);
+    });
+}
