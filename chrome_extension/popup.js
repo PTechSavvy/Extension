@@ -17,7 +17,34 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
     } else {
-      info.innerHTML = `<p class="safe">✅ This domain appears safe and approved.</p>`;
+      info.innerHTML = "<p>✅ This domain appears safe and approved.</p>";
     }
   });
+});
+
+// File scan logic
+document.getElementById("fileInput").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  const resultElem = document.getElementById("scanResult");
+
+  if (!file) return;
+
+  resultElem.textContent = "Uploading and scanning...";
+
+  const reader = new FileReader();
+  reader.onload = function () {
+    const arrayBuffer = reader.result;
+    chrome.runtime.sendMessage(
+      { action: "scanFile", name: file.name, buffer: arrayBuffer },
+      (response) => {
+        if (response.error) {
+          resultElem.textContent = "❌ " + response.error;
+        } else {
+          resultElem.innerHTML = `✅ File uploaded. <a href="https://www.virustotal.com/gui/file/${response.scanId}" target="_blank">View Results</a>`;
+        }
+      }
+    );
+  };
+
+  reader.readAsArrayBuffer(file);
 });
