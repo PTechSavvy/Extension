@@ -1,26 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Novelty Verify - Shadow IT Detection",
+  "name": "Shadow IT Detector",
+  "description": "Detects and logs usage of unapproved cloud applications.",
   "version": "1.0",
-  "description": "Detects and flags unapproved cloud apps for enterprise environments.",
-  "permissions": [
-    "storage",
-    "tabs",
-    "scripting"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "permissions": ["tabs", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
   },
   "content_scripts": [
     {
@@ -29,14 +15,22 @@
       "run_at": "document_idle"
     }
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
   "web_accessible_resources": [
     {
-      "resources": ["icons/*"],
+      "resources": ["icon16.png", "icon48.png", "icon128.png"],
       "matches": ["<all_urls>"]
     }
   ]
