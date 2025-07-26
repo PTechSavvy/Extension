@@ -20,18 +20,22 @@ document.getElementById("fileInput").addEventListener("change", async (event) =>
 
     const data = await response.json();
 
-    if (data.data && data.data.id) {
+    if (response.ok && data.data && data.data.id) {
+      const fileId = data.data.id;
+
       resultElem.innerHTML = `
-        ✅ File uploaded. 
-        <a href="https://www.virustotal.com/gui/file/${data.data.id}" target="_blank">
-          View Full Scan Results
+        ✅ File uploaded.<br>
+        <a href="https://www.virustotal.com/gui/file/${fileId}" target="_blank">
+          View Scan Results
         </a>
       `;
     } else {
-      resultElem.textContent = "⚠️ Failed to get scan ID.";
+      console.error("API error response:", data);
+      resultElem.textContent = "⚠️ Upload failed or invalid API key.";
     }
+
   } catch (err) {
-    console.error("Scan error:", err);
-    resultElem.textContent = "❌ Error uploading file.";
+    console.error("Fetch error:", err);
+    resultElem.textContent = "❌ Error uploading file. Check network/API key.";
   }
 });
