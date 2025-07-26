@@ -1,21 +1,30 @@
 {
   "manifest_version": 3,
-  "name": "Novelty Verify - Shadow IT Detector",
+  "name": "Novelty Verify - Shadow IT Detection",
+  "description": "Detect unapproved apps, scan uploaded files for malware, and provide IT-approved alternatives.",
   "version": "1.0",
-  "description": "Detects and flags unapproved cloud apps. Includes file scanning via VirusTotal.",
-  "permissions": ["tabs", "storage", "scripting"],
-  "host_permissions": ["<all_urls>"],
-  "background": {
-    "service_worker": "background.js"
-  },
   "action": {
-    "default_popup": "popup.html",
+    "default_title": "Novelty Verify",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png"
-    }
+    },
+    "default_popup": "popup.html"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "https://www.virustotal.com/*"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -26,5 +35,11 @@
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icon16.png", "icon48.png", "icon128.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
