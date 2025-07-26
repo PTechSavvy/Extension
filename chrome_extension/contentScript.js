@@ -1,6 +1,5 @@
 chrome.runtime.sendMessage({ action: "checkUnapproved" }, (response) => {
   if (response && response.isUnapproved) {
-    // Show red sticky banner
     const banner = document.createElement("div");
     banner.style.position = "fixed";
     banner.style.top = 0;
@@ -21,8 +20,5 @@ chrome.runtime.sendMessage({ action: "checkUnapproved" }, (response) => {
     banner.appendChild(closeBtn);
 
     document.body.prepend(banner);
-
-    // 🔔 Notify background script to show badge
-    chrome.runtime.sendMessage({ action: "showWarningBadge" });
   }
 });
