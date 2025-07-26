@@ -47,14 +47,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// 🔍 Tab update listener
+// ✅ On tab update (URL change)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     handleTabUpdate(tab.url, tabId);
   }
 });
 
-// 🔁 Tab switch listener
+// ✅ On tab switch (user changes tab)
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   chrome.tabs.get(tabId, (tab) => {
     if (tab?.url) {
@@ -62,15 +62,19 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
       const isUnapproved = appData.unapprovedApps?.some(app =>
         domain.includes(app.domain)
       );
+
+      // ✅ Always show the popup
+      chrome.action.setPopup({ tabId, popup: "popup.html" });
+
+      // ✅ Clear badge if approved
       if (!isUnapproved) {
         chrome.action.setBadgeText({ tabId, text: "" });
-        chrome.action.setPopup({ tabId, popup: "" });
       }
     }
   });
 });
 
-// ✅ Main function to evaluate a tab
+// ✅ Decide whether to show badge + log
 function handleTabUpdate(url, tabId) {
   const domain = new URL(url).hostname.replace("www.", "");
 
@@ -78,14 +82,15 @@ function handleTabUpdate(url, tabId) {
     domain.includes(app.domain)
   );
 
+  // ✅ Always set popup
+  chrome.action.setPopup({ tabId, popup: "popup.html" });
+
   if (isUnapproved) {
-    chrome.action.setPopup({ tabId, popup: "popup.html" });
     chrome.action.setBadgeText({ tabId, text: "!" });
     chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
     logUnapprovedDomain(domain);
   } else {
     chrome.action.setBadgeText({ tabId, text: "" });
-    chrome.action.setPopup({ tabId, popup: "" });
   }
 }
 
