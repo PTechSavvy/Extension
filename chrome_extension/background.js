@@ -1,10 +1,8 @@
 const API_BASE_URL = "https://novelty-backend.onrender.com";
 const DEFAULT_USER = "hackathon-user@example.com";
 
-// Load unapproved app data
 importScripts("appData.js");
 
-// Default approved domains
 const DEFAULT_APPROVED_APPS = [
   "docs.google.com",
   "drive.google.com",
@@ -12,44 +10,41 @@ const DEFAULT_APPROVED_APPS = [
   "teams.microsoft.com"
 ];
 
-// On install, store default approved list
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ approvedApps: DEFAULT_APPROVED_APPS });
 });
 
-// Listen for tab updates
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url?.startsWith("http")) {
-    checkDomain(tab.url, tabId);
+  if (changeInfo.status === "complete" && tab.url.startsWith("http")) {
+    handleTabUpdate(tab.url, tabId);
   }
 });
 
-// Core function
-function checkDomain(url, tabId) {
+function handleTabUpdate(url, tabId) {
   const domain = new URL(url).hostname.replace("www.", "");
 
   chrome.storage.local.get("approvedApps", (data) => {
     const approvedApps = data.approvedApps || DEFAULT_APPROVED_APPS;
-    const isApproved = approvedApps.some(d => domain.includes(d));
+    const isApproved = approvedApps.some(approvedDomain => domain.includes(approvedDomain));
 
     if (!isApproved) {
+      // Unapproved site – trigger popup, badge, and logging
+      chrome.action.setPopup({ tabId, popup: "popup.html" });
       chrome.action.setBadgeText({ tabId, text: "!" });
       chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
-      chrome.action.setPopup({ tabId, popup: "popup.html" });
 
       chrome.storage.local.set({ lastUnapproved: domain });
 
-      // ✅ Only log unapproved domains
-      logUnapproved(domain);
+      logUnapprovedDomain(domain);
     } else {
+      // Approved site – remove badge and unapproved markers
       chrome.action.setBadgeText({ tabId, text: "" });
-      chrome.action.setPopup({ tabId, popup: "popup.html" });
+      chrome.action.setPopup({ tabId, popup: "popup.html" }); // Still enable scanning popup
       chrome.storage.local.remove("lastUnapproved");
     }
   });
 }
 
-// Message listener (used by popup.js)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkUnapproved") {
     const tabDomain = new URL(sender.tab.url).hostname.replace("www.", "");
@@ -59,8 +54,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Send POST to server only for unapproved visits
-function logUnapproved(domain) {
+function logUnapprovedDomain(domain) {
   fetch(`${API_BASE_URL}/log`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -70,6 +64,10 @@ function logUnapproved(domain) {
       user: DEFAULT_USER
     })
   })
-    .then(() => console.log(`✅ Logged unapproved: ${domain}`))
-    .catch(err => console.error("❌ Failed to log:", err));
+    .then(() => {
+      console.log(`📡 Logged unapproved domain: ${domain}`);
+    })
+    .catch(err => {
+      console.error("❌ Failed to log to backend:", err);
+    });
 }
