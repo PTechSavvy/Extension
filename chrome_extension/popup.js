@@ -16,16 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <ul>${entry.vulnerabilities.map(v => `<li>${v}</li>`).join("")}</ul>
         </div>
       `;
-
-      // Notify background to show badge
-      chrome.runtime.sendMessage({ action: "showWarningBadge" });
     } else {
-      info.innerHTML = `
-        <div><span class="icon">✅</span> This domain appears safe and approved.</div>
-      `;
-
-      // Notify background to clear badge
-      chrome.runtime.sendMessage({ action: "clearBadge" });
+      info.innerHTML = `<p class="safe">✅ This domain appears safe and approved.</p>`;
     }
   });
 });
