@@ -30,8 +30,8 @@
     }
 
     .section {
-      margin-top: 14px;
-      line-height: 1.5;
+      margin-top: 12px;
+      line-height: 1.4;
     }
 
     .section ul {
@@ -48,35 +48,16 @@
     #scanResult {
       margin-top: 10px;
       font-size: 0.9em;
+      color: #333;
     }
 
     input[type="file"] {
       margin-top: 8px;
     }
 
-    .spinner {
-      border: 2px solid #ccc;
-      border-top: 2px solid #333;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    a {
-      color: #0066cc;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
+    .loading {
+      font-style: italic;
+      color: #888;
     }
   </style>
 </head>
@@ -86,14 +67,17 @@
     <h1>Novelty Verify</h1>
   </div>
 
+  <!-- Domain info -->
   <div id="info" class="section"></div>
 
+  <!-- File upload scan -->
   <div class="section">
     <strong>🔍 File Upload Scan</strong><br/>
     <input type="file" id="fileInput" />
-    <p id="scanResult"></p>
+    <p id="scanResult" class="loading">No file selected.</p>
   </div>
 
+  <!-- Scripts -->
   <script src="appData.js"></script>
   <script src="popup.js"></script>
   <script src="virusScan.js"></script>
