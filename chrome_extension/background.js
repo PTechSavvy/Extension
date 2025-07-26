@@ -1,10 +1,10 @@
-const API_BASE_URL = "https://novelty-backend.onrender.com";
+const API_BASE_URL = "https://novelty-backend.onrender.com"; // Replace with your actual server URL
 const DEFAULT_USER = "hackathon-user@example.com";
 
 // Load unapproved app data from appData.js
 importScripts("appData.js");
 
-// Default approved apps (can be overridden via admin panel)
+// Default approved domains (can be expanded)
 const DEFAULT_APPROVED_APPS = [
   "docs.google.com",
   "drive.google.com",
@@ -12,56 +12,61 @@ const DEFAULT_APPROVED_APPS = [
   "teams.microsoft.com"
 ];
 
-// When extension is installed, set default approved apps
+// On install, save approved domains
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({ approvedApps: DEFAULT_APPROVED_APPS });
 });
 
-// Handle tab updates to detect unapproved domains
+// When tab is updated
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url?.startsWith("http")) {
+  if (changeInfo.status === "complete" && tab.url.startsWith("http")) {
     handleTabUpdate(tab.url, tabId);
   }
 });
 
-// Core logic: determine if domain is approved
+// Check if current site is approved or unapproved
 function handleTabUpdate(url, tabId) {
   const domain = new URL(url).hostname.replace("www.", "");
 
   chrome.storage.local.get("approvedApps", (data) => {
     const approvedApps = data.approvedApps || DEFAULT_APPROVED_APPS;
-    const isApproved = approvedApps.some(approved => domain.includes(approved));
+    const isApproved = approvedApps.some(approvedDomain =>
+      domain.includes(approvedDomain)
+    );
 
     if (!isApproved) {
-      // Show badge and store unapproved domain
+      // Set popup and badge for unapproved app
       chrome.action.setPopup({ tabId, popup: "popup.html" });
       chrome.action.setBadgeText({ tabId, text: "!" });
       chrome.action.setBadgeBackgroundColor({ tabId, color: "#FF0000" });
 
       chrome.storage.local.set({ lastUnapproved: domain });
 
-      // Log only unapproved domains
+      // Only log unapproved visits
       logUnapprovedDomain(domain);
     } else {
-      // Clear badge and ensure popup still works for scanning
+      // Still show popup for scanning, but no badge
       chrome.action.setBadgeText({ tabId, text: "" });
       chrome.action.setPopup({ tabId, popup: "popup.html" });
+
       chrome.storage.local.remove("lastUnapproved");
     }
   });
 }
 
-// Receive request from popup.js for domain status
+// Handle request from popup to check unapproved status
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkUnapproved") {
     const tabDomain = new URL(sender.tab.url).hostname.replace("www.", "");
-    const match = appData.unapprovedApps.find(app => tabDomain.includes(app.domain));
+    const match = appData.unapprovedApps.find(app =>
+      tabDomain.includes(app.domain)
+    );
     sendResponse({ isUnapproved: !!match, domain: match?.domain || null });
     return true;
   }
 });
 
-// Log visit of unapproved site to backend
+// Log unapproved domains to the backend
 function logUnapprovedDomain(domain) {
   fetch(`${API_BASE_URL}/log`, {
     method: "POST",
@@ -72,6 +77,10 @@ function logUnapprovedDomain(domain) {
       user: DEFAULT_USER
     })
   })
-    .then(() => console.log(`📡 Logged unapproved domain: ${domain}`))
-    .catch(err => console.error("❌ Failed to log to backend:", err));
+    .then(() => {
+      console.log(`📡 Logged unapproved domain: ${domain}`);
+    })
+    .catch(err => {
+      console.error("❌ Failed to log to backend:", err);
+    });
 }
