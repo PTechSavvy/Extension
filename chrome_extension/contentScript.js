@@ -1,24 +1,25 @@
-chrome.runtime.sendMessage({ action: "checkUnapproved" }, (response) => {
-  if (response && response.isUnapproved) {
+chrome.storage.local.get("lastUnapproved", (data) => {
+  const domain = window.location.hostname.replace("www.", "");
+  if (data.lastUnapproved === domain) {
     const banner = document.createElement("div");
-    banner.style.position = "fixed";
-    banner.style.top = 0;
-    banner.style.left = 0;
-    banner.style.right = 0;
-    banner.style.backgroundColor = "#ff4d4d";
-    banner.style.color = "white";
-    banner.style.padding = "10px";
-    banner.style.zIndex = 9999;
-    banner.style.textAlign = "center";
-    banner.innerHTML = `⚠️ You are visiting an unapproved application: <strong>${response.domain}</strong>`;
-
-    const closeBtn = document.createElement("span");
-    closeBtn.innerText = " ✖";
-    closeBtn.style.marginLeft = "15px";
-    closeBtn.style.cursor = "pointer";
-    closeBtn.onclick = () => banner.remove();
-    banner.appendChild(closeBtn);
-
-    document.body.prepend(banner);
+    banner.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ff4d4d;
+      color: white;
+      padding: 10px;
+      font-size: 14px;
+      z-index: 9999;
+      text-align: center;
+    `;
+    banner.textContent = "⚠️ This is an unapproved application.";
+    const close = document.createElement("button");
+    close.textContent = "✖";
+    close.style.cssText = "margin-left: 10px; background: none; color: white; border: none; font-size: 14px;";
+    close.onclick = () => banner.remove();
+    banner.appendChild(close);
+    document.body.appendChild(banner);
   }
 });
