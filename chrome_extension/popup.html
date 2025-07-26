@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      width: 320px;
+      width: 340px;
       padding: 15px;
       background: #fdfdfd;
       color: #333;
@@ -30,8 +30,8 @@
     }
 
     .section {
-      margin-top: 12px;
-      line-height: 1.4;
+      margin-top: 14px;
+      line-height: 1.5;
     }
 
     .section ul {
@@ -52,6 +52,31 @@
 
     input[type="file"] {
       margin-top: 8px;
+    }
+
+    .spinner {
+      border: 2px solid #ccc;
+      border-top: 2px solid #333;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
