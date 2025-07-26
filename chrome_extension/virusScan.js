@@ -3,17 +3,17 @@ document.getElementById("fileInput").addEventListener("change", async (event) =>
   const resultElem = document.getElementById("scanResult");
 
   if (!file) {
-    resultElem.textContent = "⚠️ No file selected.";
+    resultElem.textContent = "No file selected.";
     return;
   }
 
-  resultElem.textContent = "⏳ Uploading and scanning...";
+  resultElem.textContent = "Uploading and scanning... ⏳";
 
   const formData = new FormData();
   formData.append("file", file);
 
   try {
-    const uploadResponse = await fetch("https://www.virustotal.com/api/v3/files", {
+    const response = await fetch("https://www.virustotal.com/api/v3/files", {
       method: "POST",
       headers: {
         "x-apikey": "98cce6e7426f335d3dc3abf374e6d183919a69777b1f8bfeec24795c6579bf88"
@@ -21,41 +21,15 @@ document.getElementById("fileInput").addEventListener("change", async (event) =>
       body: formData
     });
 
-    const uploadData = await uploadResponse.json();
-
-    if (!uploadData.data || !uploadData.data.id) {
-      resultElem.textContent = "⚠️ File upload failed.";
-      return;
-    }
-
-    const analysisId = uploadData.data.id;
-
-    resultElem.innerHTML = "⏳ Waiting for scan results...";
-
-    // Wait a few seconds before fetching results
-    await new Promise(res => setTimeout(res, 4000));
-
-    const resultResponse = await fetch(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
-      headers: {
-        "x-apikey": "98cce6e7426f335d3dc3abf374e6d183919a69777b1f8bfeec24795c6579bf88"
-      }
-    });
-
-    const resultData = await resultResponse.json();
-
-    if (resultData.data && resultData.data.attributes && resultData.data.attributes.stats) {
-      const { malicious, suspicious, harmless } = resultData.data.attributes.stats;
-      if (malicious > 0 || suspicious > 0) {
-        resultElem.innerHTML = `❌ <strong>Dangerous file!</strong><br/>Malicious: ${malicious}, Suspicious: ${suspicious}`;
-      } else {
-        resultElem.innerHTML = `✅ <strong>Safe file</strong><br/>Harmless: ${harmless}`;
-      }
+    const data = await response.json();
+    if (data.data && data.data.id) {
+      const scanId = data.data.id;
+      resultElem.innerHTML = `✅ File uploaded. <a href="https://www.virustotal.com/gui/file/${scanId}" target="_blank">View Results</a>`;
     } else {
-      resultElem.textContent = "⚠️ Could not read scan results.";
+      resultElem.textContent = "⚠️ Failed to get scan ID.";
     }
-
   } catch (err) {
     console.error("Scan error:", err);
-    resultElem.textContent = "❌ Error uploading or scanning file.";
+    resultElem.textContent = "❌ Error uploading file.";
   }
 });
