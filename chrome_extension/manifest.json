@@ -1,31 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Novelty Verify - Shadow IT & File Scanner",
-  "description": "Detect unapproved cloud apps, scan uploaded files for malware, and help secure your workflow.",
+  "name": "Novelty Verify - Shadow IT Detector",
   "version": "1.0",
-  "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
-  },
-  "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
-  "optional_permissions": [
-    "tabs",
-    "activeTab",
-    "scripting"
-  ],
-  "action": {
-    "default_icon": "icon48.png",
-    "default_title": "Novelty Verify",
-    "default_popup": "popup.html"
-  },
+  "description": "Detects and flags unapproved cloud apps. Includes file scanning via VirusTotal.",
+  "permissions": ["tabs", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
   },
   "content_scripts": [
     {
@@ -33,10 +22,9 @@
       "js": ["contentScript.js"]
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": ["icon16.png", "icon48.png", "icon128.png"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
 }
