@@ -2,17 +2,17 @@
   "manifest_version": 3,
   "name": "Novelty Verify",
   "version": "1.0",
-  "description": "Detects unapproved cloud apps and suggests alternatives with file scan support.",
-  "permissions": ["storage", "tabs", "scripting"],
-  "host_permissions": ["<all_urls>"],
+  "description": "Detect unapproved apps and scan files for malware.",
+  "permissions": ["tabs", "storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://www.virustotal.com/*",
+    "https://novelty-backend.onrender.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "128": "icon128.png"
-    }
+    "default_title": "Novelty Verify"
   },
   "content_scripts": [
     {
@@ -22,5 +22,11 @@
   ],
   "icons": {
     "128": "icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icon128.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
