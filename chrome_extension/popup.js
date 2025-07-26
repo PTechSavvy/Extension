@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Clear the badge on popup open
-  chrome.runtime.sendMessage({ action: "clearBadge" });
-
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const domain = new URL(tabs[0].url).hostname.replace("www.", "");
     const entry = appData.unapprovedApps.find(app => domain.includes(app.domain));
@@ -19,8 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
           <ul>${entry.vulnerabilities.map(v => `<li>${v}</li>`).join("")}</ul>
         </div>
       `;
+
+      // Notify background to show badge
+      chrome.runtime.sendMessage({ action: "showWarningBadge" });
     } else {
-      info.innerHTML = "<p>✅ This domain appears safe and approved.</p>";
+      info.innerHTML = `
+        <div><span class="icon">✅</span> This domain appears safe and approved.</div>
+      `;
+
+      // Notify background to clear badge
+      chrome.runtime.sendMessage({ action: "clearBadge" });
     }
   });
 });
