@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Clear the badge on popup open
+  chrome.runtime.sendMessage({ action: "clearBadge" });
+
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const domain = new URL(tabs[0].url).hostname.replace("www.", "");
     const entry = appData.unapprovedApps.find(app => domain.includes(app.domain));
