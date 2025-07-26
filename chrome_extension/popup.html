@@ -11,63 +11,39 @@
       background: #fdfdfd;
       color: #333;
     }
-
     .header {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
     }
-
     .header img {
       height: 40px;
     }
-
     h1 {
       font-size: 1rem;
       margin: 0;
       color: #222;
     }
-
     .section {
       margin-top: 12px;
       line-height: 1.4;
     }
-
     .section ul {
       padding-left: 20px;
       margin-top: 4px;
     }
-
     .icon {
       font-weight: bold;
       display: inline-block;
       width: 22px;
     }
-
     #scanResult {
       margin-top: 10px;
       font-size: 0.9em;
     }
-
     input[type="file"] {
       margin-top: 8px;
-    }
-
-    /* Spinner animation */
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 3px solid #ccc;
-      border-top: 3px solid #333;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-top: 6px;
     }
   </style>
 </head>
@@ -77,19 +53,15 @@
     <h1>Novelty Verify</h1>
   </div>
 
-  <!-- Domain info section -->
   <div id="info" class="section"></div>
 
-  <!-- File scan section -->
   <div class="section">
     <strong>🔍 File Upload Scan</strong><br/>
     <input type="file" id="fileInput" />
-    <div id="scanResult"></div>
+    <p id="scanResult"></p>
   </div>
 
-  <!-- Scripts -->
   <script src="appData.js"></script>
   <script src="popup.js"></script>
-  <script src="virusScan.js"></script>
 </body>
 </html>
